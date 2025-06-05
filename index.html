@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timeless Sparks V1.0 (Secure)</title>
+  <style>
+    /* === CSS (Keep your existing CSS) === */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+    :root {
+      --background-color: #fdfdfd;
+      --text-color: #333;
+      --input-border-color: #e0e0e0;
+      --input-focus-border-color: #007aff;
+      --button-bg-color: transparent;
+      --button-icon-color: #555;
+      --button-hover-icon-color: #007aff;
+      --quote-text-color: #2c2c2c; 
+      --quote-bg-color: #fbfaf7; 
+      --quote-shadow-color: rgba(0, 0, 0, 0.07);
+      --quote-mark-color: #a08c78; 
+      --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol";
+      --font-family-serif-quote: 'Lora', Georgia, serif; 
+      --footer-text-color: #777;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family-sans);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-grow: 1; 
+      justify-content: center;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 580px;
+      margin-bottom: 45px; 
+      background-color: #fff;
+      border: 1px solid var(--input-border-color);
+      border-radius: 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    }
+
+    .search-container:focus-within {
+      border-color: var(--input-focus-border-color);
+      box-shadow: 0 2px 10px rgba(0, 122, 255, 0.15);
+    }
+
+    #topicInput {
+      flex-grow: 1;
+      border: none;
+      outline: none;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-family: var(--font-family-sans);
+      background-color: transparent;
+      color: var(--text-color);
+      border-radius: 24px 0 0 24px;
+    }
+
+    #topicInput::placeholder {
+      color: #999;
+    }
+
+    #generateBtn {
+      background-color: var(--button-bg-color);
+      border: none;
+      padding: 10px 18px 10px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0 24px 24px 0;
+      transition: background-color 0.2s ease;
+    }
+    
+    #generateBtn:disabled svg {
+        stroke: #bbb;
+    }
+    #generateBtn:disabled {
+        cursor: not-allowed;
+    }
+
+    #generateBtn svg {
+      stroke: var(--button-icon-color);
+      transition: stroke 0.2s ease-in-out;
+    }
+
+    #generateBtn:hover:not(:disabled) svg,
+    #generateBtn:focus:not(:disabled) svg {
+      stroke: var(--button-hover-icon-color);
+    }
+
+    .quote-display {
+      font-family: var(--font-family-serif-quote);
+      margin-top: 25px;
+      font-size: clamp(1.4rem, 3.5vw, 2rem); 
+      font-weight: 500; 
+      color: var(--quote-text-color);
+      line-height: 1.7; 
+      min-height: 100px;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                  transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                  background-color 0.5s ease, 
+                  box-shadow 0.5s ease;
+      max-width: 85%; 
+      white-space: pre-wrap;
+      padding: 30px 35px; 
+      border-radius: 8px; 
+      text-align: center; 
+      background-color: transparent;
+      box-shadow: none;
+      border: 1px solid transparent; 
+    }
+
+    .quote-display.visible {
+      opacity: 1;
+      transform: translateY(0);
+      background-color: var(--quote-bg-color);
+      box-shadow: 0 5px 25px var(--quote-shadow-color);
+    }
+
+    .quote-mark {
+        color: var(--quote-mark-color);
+        font-weight: 600; 
+        font-size: 1.1em; 
+        font-style: italic; 
+        margin: 0 0.1em; 
+    }
+    .quote-mark.open {
+        margin-right: 0.2em;
+    }
+    .quote-mark.close {
+        margin-left: 0.2em;
+    }
+
+
+    .loading-indicator,
+    .error-display {
+      margin-top: 20px;
+      font-size: 1rem;
+      font-family: var(--font-family-sans); 
+      color: #777;
+      min-height: 20px;
+    }
+
+    .error-display {
+      color: #d93025;
+      font-weight: 500;
+    }
+
+    .footer-credits {
+        font-family: var(--font-family-sans);
+        font-size: 0.8em;
+        color: var(--footer-text-color);
+        text-align: center;
+        padding: 20px 10px 15px 10px;
+        width: 100%;
+        line-height: 1.5;
+    }
+
+    .footer-credits span {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .footer-credits span:last-child {
+        margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="search-container">
+      <input
+        type="text"
+        id="topicInput"
+        placeholder="What's on your mind? e.g., lost, stressed, dreaming..."
+        aria-label="Enter your feeling or topic"
+      />
+      <button id="generateBtn" aria-label="Generate quote">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="feather feather-arrow-right-circle"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 16 16 12 12 8"></polyline>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+    <div id="quoteDisplay" class="quote-display" aria-live="polite"></div>
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+      Finding that perfect line...
+    </div>
+    <div id="errorDisplay" class="error-display" style="display: none;"></div>
+  </div>
+
+  <div class="footer-credits">
+    <span>All Rights Reserved 2025 wiqnnc_</span>
+    <span><span class="love">Made with love by Win</span>. Special thanks to Gemini.</span>
+  </div>
+
+  <script>
+    const topicInput = document.getElementById('topicInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorDisplay = document.getElementById('errorDisplay');
+
+    // REMOVED API KEY from here
+    // const apiKey = "AIzaSyBY-fYlDF2RMIpBYvKQPTehdYAg1X5hSTE"; 
+    
+    // CHANGED: API URL now points to your backend
+    const backendApiUrl = '/api/get-quote'; 
+
+    async function fetchQuote(topic) {
+      quoteDisplay.classList.remove('visible');
+      quoteDisplay.innerHTML = '';
+      errorDisplay.style.display = 'none';
+      errorDisplay.textContent = '';
+      loadingIndicator.style.display = 'block';
+      generateBtn.disabled = true;
+      topicInput.disabled = true;
+
+      try {
+        // CHANGED: Fetch from your backend
+        const response = await fetch(backendApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ topic: topic }) // Send the topic to your backend
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json(); // Expecting JSON error from backend
+          console.error('Backend Error Details:', errorData);
+          throw new Error(errorData.error || `Failed to get quote from server (${response.status})`);
+        }
+
+        const data = await response.json(); // Expecting { quote: "..." } from backend
+
+        if (data.quote) {
+          let generatedText = data.quote; // Backend already processed the text
+          quoteDisplay.innerHTML = `<span class="quote-mark open">“</span>${generatedText}<span class="quote-mark close">”</span>`;
+          quoteDisplay.classList.add('visible');
+        } else {
+          throw new Error('Server returned an empty quote.');
+        }
+
+      } catch (error) {
+        console.error('Error fetching quote from backend:', error);
+        errorDisplay.textContent = error.message || 'Connection lost mid-thought. Please try again.';
+        errorDisplay.style.display = 'block';
+        quoteDisplay.classList.remove('visible');
+      } finally {
+        loadingIndicator.style.display = 'none';
+        generateBtn.disabled = false;
+        topicInput.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const topic = topicInput.value.trim();
+      if (topic) {
+        fetchQuote(topic);
+      } else {
+        errorDisplay.textContent = 'What\'s the scene? Give me a topic.';
+        errorDisplay.style.display = 'block';
+        quoteDisplay.classList.remove('visible');
+        quoteDisplay.innerHTML = '';
+      }
+    });
+
+    topicInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        generateBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
