@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> {/* Consider changing this if Thai is default, or use JS to update */}
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Timeless Sparks V1.0 (Secure)</title>
+  <title>Timeless Sparks V1.1 (Multi-lang)</title>
   <style>
-    /* === CSS (Keep your existing CSS) === */
+    /* === CSS (Existing CSS from V1.0) === */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
@@ -13,7 +13,7 @@
       --background-color: #fdfdfd;
       --text-color: #333;
       --input-border-color: #e0e0e0;
-      --input-focus-border-color: #007aff;
+      --input-focus-border-color: #007aff; /* Apple Blue */
       --button-bg-color: transparent;
       --button-icon-color: #555;
       --button-hover-icon-color: #007aff;
@@ -26,6 +26,10 @@
         "Segoe UI Emoji", "Segoe UI Symbol";
       --font-family-serif-quote: 'Lora', Georgia, serif; 
       --footer-text-color: #777;
+      --lang-button-bg: #f0f0f0;
+      --lang-button-text: #555;
+      --lang-button-active-bg: var(--input-focus-border-color);
+      --lang-button-active-text: #fff;
     }
 
     body {
@@ -55,6 +59,34 @@
       flex-grow: 1; 
       justify-content: center;
     }
+
+    /* NEW: Language Selector Styles */
+    .language-selector {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    .lang-btn {
+        padding: 8px 15px;
+        font-size: 0.9em;
+        font-weight: 500;
+        border: 1px solid var(--input-border-color);
+        background-color: var(--lang-button-bg);
+        color: var(--lang-button-text);
+        border-radius: 18px; /* Pill shape */
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .lang-btn:hover {
+        border-color: #ccc;
+        background-color: #e7e7e7;
+    }
+    .lang-btn.active {
+        background-color: var(--lang-button-active-bg);
+        color: var(--lang-button-active-text);
+        border-color: var(--lang-button-active-bg);
+    }
+
 
     .search-container {
       display: flex;
@@ -205,11 +237,17 @@
 </head>
 <body>
   <div class="container">
+    <!-- NEW: Language Selector HTML -->
+    <div class="language-selector">
+        <button class="lang-btn active" data-lang="en" id="langBtnEn">English</button>
+        <button class="lang-btn" data-lang="th" id="langBtnTh">ไทย (Thai)</button>
+    </div>
+
     <div class="search-container">
       <input
         type="text"
         id="topicInput"
-        placeholder="What's on your mind? e.g., lost, stressed, dreaming..."
+        placeholder="What's on your mind?"
         aria-label="Enter your feeling or topic"
       />
       <button id="generateBtn" aria-label="Generate quote">
@@ -250,11 +288,48 @@
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorDisplay = document.getElementById('errorDisplay');
 
-    // REMOVED API KEY from here
-    // const apiKey = "AIzaSyBY-fYlDF2RMIpBYvKQPTehdYAg1X5hSTE"; 
-    
-    // CHANGED: API URL now points to your backend
+    // NEW: Language Selector Elements and State
+    const langBtnEn = document.getElementById('langBtnEn');
+    const langBtnTh = document.getElementById('langBtnTh');
+    let currentLanguage = 'en'; // Default language
+
     const backendApiUrl = '/api/get-quote'; 
+
+    // NEW: Function to update placeholder based on language
+    function updatePlaceholder() {
+        if (currentLanguage === 'en') {
+            topicInput.placeholder = "What's on your mind? e.g., lost, stressed, dreaming...";
+            // You could also change button text, loading text, etc. here if needed
+        } else if (currentLanguage === 'th') {
+            topicInput.placeholder = "คุณกำลังรู้สึกอะไร? เช่น สับสน, เครียด, ฝันถึง...";
+        }
+    }
+    updatePlaceholder(); // Set initial placeholder
+
+    // NEW: Event listeners for language buttons
+    langBtnEn.addEventListener('click', () => {
+        if (currentLanguage !== 'en') {
+            currentLanguage = 'en';
+            langBtnEn.classList.add('active');
+            langBtnTh.classList.remove('active');
+            updatePlaceholder();
+            // Optionally, clear previous quote if language changes
+            quoteDisplay.classList.remove('visible');
+            quoteDisplay.innerHTML = '';
+        }
+    });
+
+    langBtnTh.addEventListener('click', () => {
+        if (currentLanguage !== 'th') {
+            currentLanguage = 'th';
+            langBtnTh.classList.add('active');
+            langBtnEn.classList.remove('active');
+            updatePlaceholder();
+            quoteDisplay.classList.remove('visible');
+            quoteDisplay.innerHTML = '';
+        }
+    });
+
 
     async function fetchQuote(topic) {
       quoteDisplay.classList.remove('visible');
@@ -266,25 +341,28 @@
       topicInput.disabled = true;
 
       try {
-        // CHANGED: Fetch from your backend
         const response = await fetch(backendApiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ topic: topic }) // Send the topic to your backend
+          // MODIFIED: Send topic AND currentLanguage
+          body: JSON.stringify({ 
+            topic: topic,
+            language: currentLanguage 
+          })
         });
 
         if (!response.ok) {
-          const errorData = await response.json(); // Expecting JSON error from backend
+          const errorData = await response.json();
           console.error('Backend Error Details:', errorData);
           throw new Error(errorData.error || `Failed to get quote from server (${response.status})`);
         }
 
-        const data = await response.json(); // Expecting { quote: "..." } from backend
+        const data = await response.json();
 
         if (data.quote) {
-          let generatedText = data.quote; // Backend already processed the text
+          let generatedText = data.quote;
           quoteDisplay.innerHTML = `<span class="quote-mark open">“</span>${generatedText}<span class="quote-mark close">”</span>`;
           quoteDisplay.classList.add('visible');
         } else {
@@ -308,7 +386,12 @@
       if (topic) {
         fetchQuote(topic);
       } else {
-        errorDisplay.textContent = 'What\'s the scene? Give me a topic.';
+        // Adjust empty topic message based on language if desired
+        let emptyTopicMsg = "What's the scene? Give me a topic.";
+        if (currentLanguage === 'th') {
+            emptyTopicMsg = "กำลังคิดเรื่องอะไรอยู่? บอกหัวข้อมาหน่อย";
+        }
+        errorDisplay.textContent = emptyTopicMsg;
         errorDisplay.style.display = 'block';
         quoteDisplay.classList.remove('visible');
         quoteDisplay.innerHTML = '';
