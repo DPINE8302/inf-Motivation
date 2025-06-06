@@ -85,7 +85,7 @@ app.post('/api/get-quote', async (req, res) => {
             // Word count logic might be less accurate for Thai, but keep as a rough guard
             const words = generatedText.split(/\s+|(?<=[\u0E00-\u0E7F])(?=[\u0E00-\u0E7F])|(?<=.)(?=[\u0E00-\u0E7F])|(?<=[\u0E00-\u0E7F])(?=.)/); // More complex split for Thai
             if (words.length > 25) { // Slightly more lenient for Thai
-                generatedText = words.slice(0, 25).join('') + '...'; // Join directly for Thai
+                generatedText = words.slice(0, 25).join('') + '...'; // Join directly for Thais
             }
 
 
